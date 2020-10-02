@@ -1,21 +1,39 @@
 #!/bin/bash
 
 
-rm ListOfServices.md
-touch ListOfServices.md
+rm README.md
+touch README.md
 
-echo "#Edinburgh" >> ListOfServices.md
-curl "https://catalogue.tax.service.gov.uk/api/teams/DDCE%20Live%20Service" | jq -r '.Service | .[]' >> ListOfServices.md
+print(){
+	echo "$1" >> README.md
+}
 
-echo "#Telford" >> ListOfServices.md
-echo "##BTA" >> ListOfServices.md
-curl "https://catalogue.tax.service.gov.uk/api/teams/BTA" | jq -r '.Service | .[]' >> ListOfServices.md
+parseToFile() {
+	jq -r "$1" | sed 's/^/- /' >> README.md
+}
 
-echo "##X-men and Brotherhood" >> ListOfServices.md
-curl "https://catalogue.tax.service.gov.uk/api/teams/DDCT%20Live%20Service" | jq -r '.Service | .[]' >> ListOfServices.md
+getServices() {
+	services=`curl "$1"`
+	print "### Services"
+    echo $services | parseToFile '.Service | .[]'
+	print "### Libraries"
+    echo $services | parseToFile '.Library | .[]'
+	print "### Other"
+    echo $services | parseToFile '.Other | .[]'
+}
 
-echo "#Newcastle" >> ListOfServices.md
-curl "https://catalogue.tax.service.gov.uk/api/teams/DDCN%20Live%20Service" | jq -r '.Service | .[]' >> ListOfServices.md
+print "# Edinburgh"
+getServices "https://catalogue.tax.service.gov.uk/api/teams/DDCE%20Live%20Service"
 
-echo "#Worthing" >> ListOfServices.md
-curl "https://catalogue.tax.service.gov.uk/api/teams/DDCW%20Live%20Services" | jq -r '.Service | .[]' >> ListOfServices.md
+print "# Telford" 
+print "## BTA" 
+getServices "https://catalogue.tax.service.gov.uk/api/teams/BTA"
+
+print "## X-men and Brotherhood" 
+getServices "https://catalogue.tax.service.gov.uk/api/teams/DDCT%20Live%20Service"
+
+print "# Newcastle" 
+getServices "https://catalogue.tax.service.gov.uk/api/teams/DDCN%20Live%20Service"
+
+print "# Worthing" 
+getServices "https://catalogue.tax.service.gov.uk/api/teams/DDCW%20Live%20Services"
